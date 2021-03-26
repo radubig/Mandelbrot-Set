@@ -75,3 +75,23 @@ unsigned int CreateShader(const char* VertexShaderPath, const char* FragmentShad
     glValidateProgram(program);
     return program;
 }
+
+void LoadCustomSettings(int& iterations,
+                        double& zoom,
+                        double& OffX, double& OffY,
+                        float& freq,
+                        float& UVoffset)
+{
+    std::ifstream in("settings.txt");
+    if(!in)
+    {
+        std::cerr << "[Error] Could not open \"settings.txt\"!" << std::endl;
+        return;
+    }
+
+    in >> iterations;
+    in >> zoom;
+    in >> OffX >> OffY;
+    in >> freq;
+    in >> UVoffset;
+}

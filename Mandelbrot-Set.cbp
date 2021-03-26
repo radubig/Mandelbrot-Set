@@ -38,6 +38,7 @@
 		</Linker>
 		<Unit filename="fragment.glsl" />
 		<Unit filename="main.cpp" />
+		<Unit filename="settings.txt" />
 		<Unit filename="stb_image.cpp" />
 		<Unit filename="texture.h" />
 		<Unit filename="utils.h" />

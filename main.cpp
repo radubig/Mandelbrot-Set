@@ -9,13 +9,13 @@ N -> Change Loaded Texture
 F -> Trigger Freq Animation
 G -> Trigger UV Animation
 A -> Show FPS
-L -> Print Stats
+P -> Print Stats
+L -> Load custom settings from "settings.txt"
 */
 
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "glm/glm.hpp"
 
 #include <iostream>
 #include <windows.h>
@@ -223,6 +223,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         UVChange = false;
         glUniform1f(uniforms[UTfreq], freq);
         glUniform1f(uniforms[UTUVoffset], UVoffset);
+        glUniform1i(uniforms[UTiter], iter);
+        glUniform1d(uniforms[UTzoom], zoom);
+        glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
     }
 
     if(key == GLFW_KEY_F && action == GLFW_PRESS)
@@ -242,7 +245,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if(key == GLFW_KEY_A && action == GLFW_PRESS)
         showFPS = !showFPS;
 
-    if(key == GLFW_KEY_L && action == GLFW_PRESS)
+    if(key == GLFW_KEY_P && action == GLFW_PRESS)
     {
         cout<<"iter = "<<iter<<"\n";
         cout<<"zoom = "<<zoom<<"\n";
@@ -251,9 +254,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         cout<<"UV Offset = "<<UVoffset<<endl;
     }
 
+    if(key == GLFW_KEY_L && action == GLFW_PRESS)
+    {
+        LoadCustomSettings(iter, zoom, OffX, OffY, freq, UVoffset);
+        glUniform1i(uniforms[UTiter], iter);
+        glUniform1d(uniforms[UTzoom], zoom);
+        glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
+        glUniform1f(uniforms[UTfreq], freq);
+        glUniform1f(uniforms[UTUVoffset], UVoffset);
+    }
+
     glUniform1i(uniforms[UTiter], iter);
     glUniform1d(uniforms[UTzoom], zoom);
-    glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
+    //glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)

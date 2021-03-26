@@ -714,3 +714,74 @@
 1616446299 source:d:\proiecte\alte proiecte\mandelbrot-set\stb_image.cpp
 	"dep/stb_image.h"
 
+1616446299 source:d:\proiecte\github\mandelbrot-set\stb_image.cpp
+	"dep/stb_image.h"
+
+1596818530 d:\proiecte\github\mandelbrot-set\dep\stb_image.h
+	"stb_image.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<math.h>
+	<stdio.h>
+	<assert.h>
+	<stdint.h>
+	<emmintrin.h>
+	<intrin.h>
+	<arm_neon.h>
+
+1616798823 source:d:\proiecte\github\mandelbrot-set\main.cpp
+	"GL/glew.h"
+	"GLFW/glfw3.h"
+	<iostream>
+	<windows.h>
+	<chrono>
+	<vector>
+	"utils.h"
+	"texture.h"
+
+1501497981 d:\proiecte\github\mandelbrot-set\gl\glew.h
+	<stddef.h>
+	<inttypes.h>
+	<stdint.h>
+	<inttypes.h>
+	<Availability.h>
+	<OpenGL/glu.h>
+	<GL/glu.h>
+
+1579479197 d:\proiecte\github\mandelbrot-set\glfw\glfw3.h
+	<stddef.h>
+	<stdint.h>
+	<vulkan/vulkan.h>
+	<GLES/gl.h>
+	<GLES/glext.h>
+	<GLES2/gl2.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl3.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl31.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl32.h>
+	<GLES2/gl2ext.h>
+	<OpenGL/gl3.h>
+	<OpenGL/gl3ext.h>
+	<GL/glcorearb.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glext.h>
+	<GL/glu.h>
+
+1616798912 d:\proiecte\github\mandelbrot-set\utils.h
+	<fstream>
+	<sstream>
+
+1616664797 d:\proiecte\github\mandelbrot-set\texture.h
+	<cstdarg>
+	"dep/stb_image.h"
+	<vector>
+
