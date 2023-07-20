@@ -14,11 +14,10 @@ L -> Load custom settings from "settings.txt"
 */
 
 #define GLEW_STATIC
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <windows.h>
 #include <chrono>
 #include <vector>
 #include "utils.h"
@@ -112,10 +111,10 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), nullptr);
 
-    program = CreateShader("vertex.glsl", "fragment.glsl");
+    program = CreateShader("shaders/vertex.glsl", "shaders/fragment.glsl");
     glUseProgram(program);
 
-    LoadTexVectorVar(TexVec, 5, "pal.png", "pal2.png", "pal4.png", "pal5.png", "pal6.png");
+    LoadTexVectorVar(TexVec, 5, "img/pal.png", "img/pal2.png", "img/pal4.png", "img/pal5.png", "img/pal6.png");
 
     /// Special thanks to Alexandra Toma for some textures ideas
     /// and to Daniel Ghindea for the textures itself

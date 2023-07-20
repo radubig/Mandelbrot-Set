@@ -1,9 +1,8 @@
 #pragma once
+#include <GL/glew.h>
 #include <cstdarg>
-#include "dep/stb_image.h"
+#include <stb_image.h>
 #include <vector>
-
-using namespace std;
 
 uint32_t LoadPNG_1D(const char* path)
 {
@@ -27,7 +26,7 @@ uint32_t LoadPNG_1D(const char* path)
     return texture;
 }
 
-void LoadTexVectorVar(vector<uint32_t>& v, int n, ...)
+void LoadTexVectorVar(std::vector<uint32_t>& v, int n, ...)
 {
     v.clear();
     va_list args;
