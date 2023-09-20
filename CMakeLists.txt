@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_DEFAULT_BUILD_TYPE "Release")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
@@ -42,6 +41,7 @@ target_link_libraries(${PROJECT_NAME} glfw libglew_static)
 
 ##### Install commands #####
 
-install(TARGETS ${PROJECT_NAME} DESTINATION Release)
-install(DIRECTORY img DESTINATION Release)
-install(DIRECTORY shaders DESTINATION Release)
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(DIRECTORY img DESTINATION bin)
+install(DIRECTORY shaders DESTINATION bin)
+# TODO: exclude other files from being installed
