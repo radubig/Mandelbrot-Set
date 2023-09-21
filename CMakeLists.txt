@@ -12,11 +12,6 @@ endif()
 
 ##### External dependencies #####
 
-# NOTE: X11 may not be required for the main project. Maybe remove?
-if(UNIX)
-    find_package(X11)
-endif()
-
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 

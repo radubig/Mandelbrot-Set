@@ -28,7 +28,7 @@ The project uses CMake to generate project files or makefiles for your chosen de
 
 First, use CMake to generate the configuration files. As an example, we'll generate the files in a folder called `build`:
 ```shell
-md build
+mkdir build
 cd build
 cmake ..
 ```
