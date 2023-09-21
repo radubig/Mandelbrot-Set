@@ -22,6 +22,25 @@ Currently the program has been tested on Windows and Linux.
 |        `P`        | Print Stats                   |
 |        `L`        | Load custom settings          |
 
-## Build
+## Compiling
 
-To build the program, use CMake to generate the configuration files required for installing the program.
+The project uses CMake to generate project files or makefiles for your chosen development environment.
+
+First, use CMake to generate the configuration files. As an example, we'll generate the files in a folder called `build`:
+```shell
+md build
+cd build
+cmake ..
+```
+*Note: You may need to explicitly specify a generator for cmake if it fails to find the corresponding one for your system. On windows, if you have MinGW installed, you may want to run:*
+```shell
+cmake -G "MinGW Makefiles" ..
+```
+After generating the configuration files, build the program using
+```shell
+cmake --build . --target MandelbrotSet --config Release
+```
+and install it in a folder of your choice (in this example, it will be installed in `Release`):
+```shell
+cmake --install . --prefix ../Release
+```
