@@ -10,10 +10,14 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(MANDELBROT_DEBUG)
+endif()
+
 ##### External dependencies #####
 
 include(FetchContent)
-set(FETCHCONTENT_QUIET OFF)
+#set(FETCHCONTENT_QUIET OFF)
 
 FETCHCONTENT_DECLARE(
         glfw
@@ -23,8 +27,10 @@ FETCHCONTENT_DECLARE(
 
 FetchContent_GetProperties(glfw)
 if(NOT glfw_POPULATED)
+    message(STATUS "FetchContent: retrieving GLFW...")
     FetchContent_Populate(glfw)
     add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR} EXCLUDE_FROM_ALL)
+    message(STATUS "FetchContent: GLFW populated")
 endif()
 
 FETCHCONTENT_DECLARE(
@@ -35,13 +41,16 @@ FETCHCONTENT_DECLARE(
 
 FetchContent_GetProperties(glew)
 if(NOT glew_POPULATED)
+    message(STATUS "FetchContent: retrieving GLEW...")
     FetchContent_Populate(glew)
     add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
+    message(STATUS "FetchContent: GLEW populated")
 endif()
 
 ##### Include commands #####
 
-add_executable(${PROJECT_NAME} src/main.cpp src/stb_image.cpp)
+file(GLOB_RECURSE Src "src/*.cpp")
+add_executable(${PROJECT_NAME} ${Src})
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE dep)
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${glew_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} glfw libglew_static)
