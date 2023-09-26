@@ -27,6 +27,10 @@ private:
     void onCreate();
     void onUpdate();
     void onFixedUpdate();
+    void render();
+    void timing_thread();
+
+    static int s_fixedDeltaTime;
 
     GLFWwindow *m_window;
     std::vector<uint32_t> m_textures;

@@ -1,8 +1,12 @@
 #include "App.h"
 #include <iostream>
 #include <stdexcept>
+#include <thread>
+#include <chrono>
 #include "shader.h"
 #include "texture.h"
+
+int App::s_fixedDeltaTime = 20; // milliseconds
 
 App& App::getInstance()
 {
@@ -23,16 +27,9 @@ void App::run()
 
     onCreate();
 
-    while(!glfwWindowShouldClose(m_window))
-    {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        onUpdate();
-
-        glfwSwapBuffers(m_window);
-        glfwPollEvents();
-    }
+    std::thread fixedUpdateThread(&App::timing_thread, this);
+    render();
+    fixedUpdateThread.join();
 
     glfwTerminate();
     // Temporary line
@@ -49,9 +46,9 @@ MessageCallback( GLenum source,
                  const void* userParam )
 {
     if(type == GL_DEBUG_TYPE_ERROR)
-        std::cerr << "GL ERROR (severity " << severity << "): " << message << std::endl;
+        std::cerr << "GL ERROR: " << message << std::endl;
     else
-        std::cout << "GL message (severity " << severity << "): " << message << std::endl;
+        std::cout << "GL message: " << message << std::endl;
 }
 
 void App::initWindow()
@@ -147,14 +144,27 @@ void App::onCreate()
     glBindTexture(GL_TEXTURE_1D, m_textures[0]);
 }
 
-
 // This function is called once per frame
 void App::onUpdate()
 {
+    // set all uniforms
+    glUniform1i(m_uniforms["iter"], m_params.iter);
+    glUniform1d(m_uniforms["zoom"], m_params.zoom);
+    glUniform1f(m_uniforms["freq"], m_params.freq);
+    glUniform1f(m_uniforms["UVoffset"], m_params.UVoffset);
+    glUniform2d(m_uniforms["screenOffset"], m_params.OffX, m_params.OffY);
+    glUniform2d(m_uniforms["screenSize"], (double)m_width, (double)m_height);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+// This function is called on a fixed delta time
+void App::onFixedUpdate()
+{
+    // Important: DO NOT CALL GL FUNCTIONS FROM HERE!!!
     if(m_params.isZooming)
     {
-        m_params.zoom *= 1.002;
-        glUniform1d(m_uniforms["zoom"], m_params.zoom);
+        m_params.zoom *= 1.005;
     }
 
     if(m_params.freqChange)
@@ -167,28 +177,46 @@ void App::onUpdate()
         }
         if(freqDir > 0) m_params.freq *= freqCoef;
         else m_params.freq /= freqCoef;
-        glUniform1f(m_uniforms["freq"], m_params.freq);
     }
 
     if(m_params.UVChange)
     {
         m_params.UVoffset += UVoffsetCoef;
         if(m_params.UVoffset > 1.0f) m_params.UVoffset = 0.0f;
-        glUniform1f(m_uniforms["UVoffset"], m_params.UVoffset);
     }
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-
-// This function is called on a fixed clock
-void App::onFixedUpdate()
+void App::render()
 {
+    while(!glfwWindowShouldClose(m_window))
+    {
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
+        onUpdate();
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
 }
 
+void App::timing_thread()
+{
+    // No OpenGL calls should be made here.
+    typedef std::chrono::time_point<std::chrono::steady_clock> TP;
 
-
+    TP clock = std::chrono::steady_clock::now();
+    TP moment;
+    while(!glfwWindowShouldClose(m_window))
+    {
+        moment = std::chrono::steady_clock::now();
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(moment - clock).count() > s_fixedDeltaTime)
+        {
+            clock = moment;
+            onFixedUpdate();
+        }
+    }
+}
 
 
 
@@ -220,11 +248,6 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
         app.m_params.isZooming = false;
         app.m_params.freqChange = false;
         app.m_params.UVChange = false;
-        glUniform1f(app.m_uniforms["freq"], app.m_params.freq);
-        glUniform1f(app.m_uniforms["UVoffset"], app.m_params.UVoffset);
-        glUniform1i(app.m_uniforms["iter"], app.m_params.iter);
-        glUniform1d(app.m_uniforms["zoom"], app.m_params.zoom);
-        glUniform2d(app.m_uniforms["screenOffset"], app.m_params.OffX, app.m_params.OffY);
     }
 
     if(key == GLFW_KEY_F && action == GLFW_PRESS)
@@ -261,16 +284,7 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
                            app.m_params.OffY,
                            app.m_params.freq,
                            app.m_params.UVoffset);
-        glUniform1i(uniforms[UTiter], iter);
-        glUniform1d(uniforms[UTzoom], zoom);
-        glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
-        glUniform1f(uniforms[UTfreq], freq);
-        glUniform1f(uniforms[UTUVoffset], UVoffset);
     }*/
-
-    glUniform1i(app.m_uniforms["iter"], app.m_params.iter);
-    glUniform1d(app.m_uniforms["zoom"], app.m_params.zoom);
-    //glUniform2d(uniforms[UTscreenOffset], OffX, OffY);
 }
 
 void App::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -293,7 +307,6 @@ void App::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
     app.m_params.OffY += (app.oldy - ypos) / app.m_params.zoom;
     app.oldx = xpos;
     app.oldy = ypos;
-    glUniform2d(app.m_uniforms["screenOffset"], app.m_params.OffX, app.m_params.OffY);
 }
 
 void App::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -303,9 +316,6 @@ void App::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         app.m_params.iter += int(yoffset) * 5;
     else
         app.m_params.zoom += yoffset * 10 * (app.m_params.zoom/100.0);
-
-    glUniform1i(app.m_uniforms["iter"], app.m_params.iter);
-    glUniform1d(app.m_uniforms["zoom"], app.m_params.zoom);
 }
 
 void App::window_size_callback(GLFWwindow* window, int w, int h)
@@ -313,6 +323,5 @@ void App::window_size_callback(GLFWwindow* window, int w, int h)
     App& app = App::getInstance();
     app.m_width = w;
     app.m_height = h;
-    glUniform2d(app.m_uniforms["screenSize"], (double)app.m_width, (double)app.m_height);
     glViewport(0, 0, app.m_width, app.m_height);
 }
