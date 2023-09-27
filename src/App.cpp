@@ -6,7 +6,7 @@
 #include "shader.h"
 #include "texture.h"
 
-int App::s_fixedDeltaTime = 20; // milliseconds
+int App::s_fixedDeltaTime = 10; // milliseconds
 
 App& App::getInstance()
 {
@@ -164,7 +164,7 @@ void App::onFixedUpdate()
     // Important: DO NOT CALL GL FUNCTIONS FROM HERE!!!
     if(m_params.isZooming)
     {
-        m_params.zoom *= 1.005;
+        m_params.zoom *= 1.003;
     }
 
     if(m_params.freqChange)
@@ -216,22 +216,22 @@ void App::timing_thread()
 
 void App::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    if(action != GLFW_PRESS)
+        return;
+
     App& app = App::getInstance();
 
-    if(key == GLFW_KEY_KP_ADD && action == GLFW_PRESS)
+    if(key == GLFW_KEY_KP_ADD)
         app.m_params.zoom *= 2;
-    else if(key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_KP_SUBTRACT)
         app.m_params.zoom /= 2;
-
-    if(key == GLFW_KEY_E && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_E)
         app.m_params.iter += 50;
-    else if(key == GLFW_KEY_Q && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_Q)
         app.m_params.iter -= 50;
-
-    if(key == GLFW_KEY_Z && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_Z)
         app.m_params.isZooming = !app.m_params.isZooming;
-
-    if(key == GLFW_KEY_R && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_R)
     {
         app.m_params.zoom = 100;
         app.m_params.OffX = 0;
@@ -243,14 +243,11 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
         app.m_params.freqChange = false;
         app.m_params.UVChange = false;
     }
-
-    if(key == GLFW_KEY_F && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_F)
         app.m_params.freqChange = !app.m_params.freqChange;
-
-    if(key == GLFW_KEY_G && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_G)
         app.m_params.UVChange = !app.m_params.UVChange;
-
-    if(key == GLFW_KEY_N && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_N)
     {
         static unsigned int index = 0;
         index++;
@@ -258,10 +255,10 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
         glBindTexture(GL_TEXTURE_1D, app.m_textures[index]);
     }
 
-    //if(key == GLFW_KEY_A && action == GLFW_PRESS)
+    //else if(key == GLFW_KEY_A)
     //    showFPS = !showFPS;
 
-    if(key == GLFW_KEY_P && action == GLFW_PRESS)
+    else if(key == GLFW_KEY_P)
     {
         std::cout<<"iter = "<<app.m_params.iter<<"\n";
         std::cout<<"zoom = "<<app.m_params.zoom<<"\n";
@@ -270,7 +267,7 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
         std::cout<<"UV Offset = "<<app.m_params.UVoffset<<std::endl;
     }
 
-    /*if(key == GLFW_KEY_L && action == GLFW_PRESS)
+    /*else if(key == GLFW_KEY_L)
     {
         LoadCustomSettings(app.m_params.iter,
                            app.m_params.zoom,

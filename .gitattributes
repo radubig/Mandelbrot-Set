@@ -1,2 +1,4 @@
-*.c linguist-detectable=false
-*.h linguist-detectable=false
+*.c     text diff=c
+*.cpp   text diff=cpp
+*.h     text diff=cpp
+dep/* linguist-detectable=false
