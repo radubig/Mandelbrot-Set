@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <unordered_map>
 #include <string>
 
 class App
@@ -34,7 +33,10 @@ private:
 
     GLFWwindow *m_window;
     std::vector<uint32_t> m_textures;
-    std::unordered_map<std::string, int> m_uniforms;
+
+    struct {
+        int iter, zoom, freq, tex, screenOffset, screenSize, UVoffset;
+    }m_uniform_loc;
 
     int m_width = 800;
     int m_height = 800;

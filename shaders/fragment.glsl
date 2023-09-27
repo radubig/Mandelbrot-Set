@@ -10,11 +10,11 @@ uniform sampler1D tex;
 uniform float freq;
 uniform float UVoffset;
 
-double n = 0;
-double C = 4.0;
+const double C = 4.0;
 
 double IterationsNumber(dvec2 coord)
 {
+    double n = 0;
     dvec2 last = dvec2(0.0, 0.0);
     for(int i=1; i<=iter; i++)
     {
@@ -31,6 +31,7 @@ double IterationsNumber(dvec2 coord)
 
 double NormalizedIteration(dvec2 coord)
 {
+    double n = 0;
     double x = 0, y = 0, aux;
     while(x*x + y*y <= C && n < iter)
     {

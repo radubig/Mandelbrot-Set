@@ -15,7 +15,7 @@ App& App::getInstance()
 }
 
 App::App()
-    :m_window(nullptr)
+    :m_window(nullptr), m_uniform_loc()
 {
 
 }
@@ -122,22 +122,22 @@ void App::onCreate()
     LoadTexVectorVar(m_textures, 5, "img/pal.png", "img/pal2.png", "img/pal4.png", "img/pal5.png", "img/pal6.png");
 
     // Retrieve uniform locations
-    m_uniforms["iter"] = glGetUniformLocation(program, "iter");
-    m_uniforms["zoom"] = glGetUniformLocation(program, "zoom");
-    m_uniforms["screenOffset"] = glGetUniformLocation(program, "screenOffset");
-    m_uniforms["screenSize"] = glGetUniformLocation(program, "screenSize");
-    m_uniforms["tex"] = glGetUniformLocation(program, "tex");
-    m_uniforms["freq"] = glGetUniformLocation(program, "freq");
-    m_uniforms["UVoffset"] = glGetUniformLocation(program, "UVoffset");
+    m_uniform_loc.iter = glGetUniformLocation(program, "iter");
+    m_uniform_loc.zoom = glGetUniformLocation(program, "zoom");
+    m_uniform_loc.screenOffset = glGetUniformLocation(program, "screenOffset");
+    m_uniform_loc.screenSize = glGetUniformLocation(program, "screenSize");
+    m_uniform_loc.tex = glGetUniformLocation(program, "tex");
+    m_uniform_loc.freq = glGetUniformLocation(program, "freq");
+    m_uniform_loc.UVoffset = glGetUniformLocation(program, "UVoffset");
 
     // Set initial uniform values
-    glUniform1i(m_uniforms["iter"], m_params.iter);
-    glUniform1d(m_uniforms["zoom"], m_params.zoom);
-    glUniform1f(m_uniforms["freq"], m_params.freq);
-    glUniform1f(m_uniforms["UVoffset"], m_params.UVoffset);
-    glUniform2d(m_uniforms["screenOffset"], m_params.OffX, m_params.OffY);
-    glUniform2d(m_uniforms["screenSize"], (double)m_width, (double)m_height);
-    glUniform1i(m_uniforms["tex"], 0);
+    glUniform1i(m_uniform_loc.iter, m_params.iter);
+    glUniform1d(m_uniform_loc.zoom, m_params.zoom);
+    glUniform1f(m_uniform_loc.freq, m_params.freq);
+    glUniform1f(m_uniform_loc.UVoffset, m_params.UVoffset);
+    glUniform2d(m_uniform_loc.screenOffset, m_params.OffX, m_params.OffY);
+    glUniform2d(m_uniform_loc.screenSize, (double)m_width, (double)m_height);
+    glUniform1i(m_uniform_loc.tex, 0);
 
     // Set active texture
     glActiveTexture(GL_TEXTURE0);
@@ -148,12 +148,12 @@ void App::onCreate()
 void App::onUpdate()
 {
     // set all uniforms
-    glUniform1i(m_uniforms["iter"], m_params.iter);
-    glUniform1d(m_uniforms["zoom"], m_params.zoom);
-    glUniform1f(m_uniforms["freq"], m_params.freq);
-    glUniform1f(m_uniforms["UVoffset"], m_params.UVoffset);
-    glUniform2d(m_uniforms["screenOffset"], m_params.OffX, m_params.OffY);
-    glUniform2d(m_uniforms["screenSize"], (double)m_width, (double)m_height);
+    glUniform1i(m_uniform_loc.iter, m_params.iter);
+    glUniform1d(m_uniform_loc.zoom, m_params.zoom);
+    glUniform1f(m_uniform_loc.freq, m_params.freq);
+    glUniform1f(m_uniform_loc.UVoffset, m_params.UVoffset);
+    glUniform2d(m_uniform_loc.screenOffset, m_params.OffX, m_params.OffY);
+    glUniform2d(m_uniform_loc.screenSize, (double)m_width, (double)m_height);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -204,17 +204,11 @@ void App::timing_thread()
 {
     // No OpenGL calls should be made here.
     typedef std::chrono::time_point<std::chrono::steady_clock> TP;
-
-    TP clock = std::chrono::steady_clock::now();
-    TP moment;
     while(!glfwWindowShouldClose(m_window))
     {
-        moment = std::chrono::steady_clock::now();
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(moment - clock).count() > s_fixedDeltaTime)
-        {
-            clock = moment;
-            onFixedUpdate();
-        }
+        TP moment = std::chrono::steady_clock::now() + std::chrono::milliseconds(s_fixedDeltaTime);
+        onFixedUpdate();
+        std::this_thread::sleep_until(moment);
     }
 }
 
