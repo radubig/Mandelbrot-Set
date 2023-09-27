@@ -1,7 +1,5 @@
 #version 440 core
 
-precision highp float;
-
 layout(location = 0) out vec4 color;
 
 uniform int iter;
@@ -31,11 +29,37 @@ double IterationsNumber(dvec2 coord)
     return n;
 }
 
+double NormalizedIteration(dvec2 coord)
+{
+    double x = 0, y = 0, aux;
+    while(x*x + y*y <= C && n < iter)
+    {
+        aux = x*x - y*y + coord.x;
+        y = 2 * x * y + coord.y;
+        x = aux;
+        n += 1;
+    }
+    if(n < iter)
+    {
+        float log_zn = log(float(x*x + y*y)) * 0.5;
+        float nu = log(log_zn / log(2)) / log(2);
+        n = floor(n + 1 - nu);
+    }
+
+    return n;
+}
+
 void main()
 {
+    vec4 cl1, cl2;
     dvec2 coord = dvec2(gl_FragCoord.xy);
     double t = IterationsNumber((coord - screenSize/2)/zoom - screenOffset);
+    //double t = NormalizedIteration((coord - screenSize * 0.5)/zoom - screenOffset);
     if(t==iter) color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     else
+        /*cl1 = texture(tex, floor(float(t)) / iter + UVoffset);
+        cl2 = texture(tex, floor(float(t)+1) / iter + UVoffset);
+        color = mix(cl1, cl2, float(t) - floor(float(t)));*/
+        //color = texture(tex, 1.0 / float(t));
         color = texture(tex, float(t) / freq + UVoffset);
 }
