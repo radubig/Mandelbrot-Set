@@ -1,4 +1,7 @@
 #include "App.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <iostream>
 #include <stdexcept>
 #include <thread>
@@ -31,9 +34,12 @@ void App::run()
     render();
     fixedUpdateThread.join();
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(m_window);
     glfwTerminate();
-    // Temporary line
-    exit(0);
 }
 
 static void
@@ -47,8 +53,6 @@ MessageCallback( GLenum source,
 {
     if(type == GL_DEBUG_TYPE_ERROR)
         std::cerr << "GL ERROR: " << message << std::endl;
-    else
-        std::cout << "GL message: " << message << std::endl;
 }
 
 void App::initWindow()
@@ -66,7 +70,6 @@ void App::initWindow()
     glfwSetScrollCallback(m_window, App::scroll_callback);
     glfwSetWindowSizeCallback(m_window, App::window_size_callback);
 
-
     if(glewInit() != GLEW_OK)
         throw std::runtime_error("[GLEW]: Could not initialize GLEW!");
 
@@ -76,6 +79,27 @@ void App::initWindow()
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, nullptr);
 #endif
+
+    // dear imgui initialization
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+    ImGui::StyleColorsDark();
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplOpenGL3_Init();
 }
 
 
@@ -155,7 +179,27 @@ void App::onUpdate()
     glUniform2d(m_uniform_loc.screenOffset, m_params.OffX, m_params.OffY);
     glUniform2d(m_uniform_loc.screenSize, (double)m_width, (double)m_height);
 
+    // draw call
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // ImGui stuff
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Demo Windows for debugging purposes
+    ImGui::ShowDemoWindow();
+
+    // Control pannel for Mandelbrot set
+    {
+        ImGui::Begin("Mandelbrot Set Controls");
+        ImGui::SliderInt("iterations: ", &m_params.iter, 0, 10000);
+        ImGui::DragScalar("zoom: ", ImGuiDataType_Double, &m_params.zoom);
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 // This function is called on a fixed delta time
@@ -194,6 +238,17 @@ void App::render()
         glClear(GL_COLOR_BUFFER_BIT);
 
         onUpdate();
+
+        // Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
@@ -296,6 +351,8 @@ void App::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
     if(!app.m_params.isDragging) return;
     app.m_params.OffX += (xpos - app.oldx) / app.m_params.zoom;
     app.m_params.OffY += (app.oldy - ypos) / app.m_params.zoom;
+    //app.m_params.OffX += (xpos - app.oldx);
+    //app.m_params.OffY += (app.oldy - ypos);
     app.oldx = xpos;
     app.oldy = ypos;
 }

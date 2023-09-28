@@ -49,10 +49,12 @@ endif()
 
 ##### Include commands #####
 
-file(GLOB_RECURSE Src "src/*.cpp")
-add_executable(${PROJECT_NAME} ${Src})
+file(GLOB Src "src/*.cpp")
+file(GLOB imgui "dep/imgui/*.cpp" "dep/imgui/backends/imgui_impl_opengl3.cpp" "dep/imgui/backends/imgui_impl_glfw.cpp")
+add_executable(${PROJECT_NAME} ${Src} ${imgui})
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE dep)
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${glew_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE dep/imgui)
 target_link_libraries(${PROJECT_NAME} glfw libglew_static)
 
 ##### Install commands #####
