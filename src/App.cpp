@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <thread>
 #include <chrono>
-#include <limits>
 #include "shader.h"
 #include "texture.h"
 
