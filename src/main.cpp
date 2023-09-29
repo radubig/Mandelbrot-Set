@@ -8,9 +8,8 @@ R -> Reset
 N -> Change Loaded Texture
 F -> Trigger Freq Animation
 G -> Trigger UV Animation
-(NOT IMPLEMENTED) A -> Show FPS
-P -> Print Stats
-(NOT IMPLEMENTED) L -> Load custom settings from "settings.txt"
+(TODO) Show FPS
+(TODO) Load custom settings
 */
 
 #include "App.h"

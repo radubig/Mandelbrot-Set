@@ -28,6 +28,7 @@ private:
     void onFixedUpdate();
     void render();
     void timing_thread();
+    void resetDefaultValues();
 
     static int s_fixedDeltaTime;
 
@@ -40,6 +41,7 @@ private:
 
     int m_width = 800;
     int m_height = 800;
+    int m_active_texture = 0;
 
     struct {
         int iter = 200;
@@ -58,6 +60,7 @@ private:
     double oldx = 0, oldy = 0;
     const float UVoffsetCoef = 0.002f;
     const float freqCoef = 1.001f;
+    const float zoomCoef = 1.003f;
     int freqDir = 1;
 };
 

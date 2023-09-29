@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <thread>
 #include <chrono>
+#include <limits>
 #include "shader.h"
 #include "texture.h"
 
@@ -53,6 +54,19 @@ MessageCallback( GLenum source,
 {
     if(type == GL_DEBUG_TYPE_ERROR)
         std::cerr << "GL ERROR: " << message << std::endl;
+}
+
+void App::resetDefaultValues()
+{
+    m_params.zoom = 100;
+    m_params.OffX = 0;
+    m_params.OffY = 0;
+    m_params.iter = 200;
+    m_params.freq = 30.0f;
+    m_params.UVoffset = 0.0f;
+    m_params.isZooming = false;
+    m_params.freqChange = false;
+    m_params.UVChange = false;
 }
 
 void App::initWindow()
@@ -188,13 +202,36 @@ void App::onUpdate()
     ImGui::NewFrame();
 
     // Demo Windows for debugging purposes
+#ifdef MANDELBROT_DEBUG
     ImGui::ShowDemoWindow();
+#endif
 
     // Control pannel for Mandelbrot set
     {
+        static const double zoom_min = 100,
+                            zoom_max = 1e17;
+
         ImGui::Begin("Mandelbrot Set Controls");
-        ImGui::SliderInt("iterations: ", &m_params.iter, 0, 10000);
-        ImGui::DragScalar("zoom: ", ImGuiDataType_Double, &m_params.zoom);
+        ImGui::DragInt("iterations", &m_params.iter, 1.0f, 0, 10000);
+        ImGui::SliderScalar("zoom", ImGuiDataType_Double, &m_params.zoom, &zoom_min, &zoom_max, nullptr, ImGuiSliderFlags_Logarithmic);
+        ImGui::DragFloat("frequency", &m_params.freq, freqCoef, 30, (float)m_params.iter, "%.3f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("UV offset", &m_params.UVoffset, 0, 1);
+        ImGui::Text("Offset X: %f          Offset Y: %f", m_params.OffX, m_params.OffY);
+        ImGui::Text("Select Pallete: ");
+        for(int i = 0; i < m_textures.size(); i++)
+        {
+            std::string s = std::to_string(i);
+            ImGui::SameLine();
+            ImGui::RadioButton(s.c_str(), &m_active_texture, i);
+        }
+
+        ImGui::Checkbox("Auto Zoom", &m_params.isZooming);
+        ImGui::Checkbox("Frequency Animation", &m_params.freqChange);
+        ImGui::Checkbox("UV Animation", &m_params.UVChange);
+        if(ImGui::Button("Reset Parameters"))
+            resetDefaultValues();
+
+        glBindTexture(GL_TEXTURE_1D, m_textures[m_active_texture]);
         ImGui::End();
     }
 
@@ -208,7 +245,7 @@ void App::onFixedUpdate()
     // Important: DO NOT CALL GL FUNCTIONS FROM HERE!!!
     if(m_params.isZooming)
     {
-        m_params.zoom *= 1.003;
+        m_params.zoom *= zoomCoef;
     }
 
     if(m_params.freqChange)
@@ -287,40 +324,20 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
     else if(key == GLFW_KEY_Z)
         app.m_params.isZooming = !app.m_params.isZooming;
     else if(key == GLFW_KEY_R)
-    {
-        app.m_params.zoom = 100;
-        app.m_params.OffX = 0;
-        app.m_params.OffY = 0;
-        app.m_params.iter = 200;
-        app.m_params.freq = 30.0f;
-        app.m_params.UVoffset = 0.0f;
-        app.m_params.isZooming = false;
-        app.m_params.freqChange = false;
-        app.m_params.UVChange = false;
-    }
+        app.resetDefaultValues();
     else if(key == GLFW_KEY_F)
         app.m_params.freqChange = !app.m_params.freqChange;
     else if(key == GLFW_KEY_G)
         app.m_params.UVChange = !app.m_params.UVChange;
     else if(key == GLFW_KEY_N)
     {
-        static unsigned int index = 0;
-        index++;
-        if(index == app.m_textures.size()) index=0;
-        glBindTexture(GL_TEXTURE_1D, app.m_textures[index]);
+        app.m_active_texture++;
+        if(app.m_active_texture == app.m_textures.size())
+            app.m_active_texture=0;
     }
 
     //else if(key == GLFW_KEY_A)
     //    showFPS = !showFPS;
-
-    else if(key == GLFW_KEY_P)
-    {
-        std::cout<<"iter = "<<app.m_params.iter<<"\n";
-        std::cout<<"zoom = "<<app.m_params.zoom<<"\n";
-        std::cout<<"Offsets: x = "<<app.m_params.OffX<<"; y = "<<app.m_params.OffY<<"\n";
-        std::cout<<"Frequency = "<<app.m_params.freq<<"\n";
-        std::cout<<"UV Offset = "<<app.m_params.UVoffset<<std::endl;
-    }
 
     /*else if(key == GLFW_KEY_L)
     {
